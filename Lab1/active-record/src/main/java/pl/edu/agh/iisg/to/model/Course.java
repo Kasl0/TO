@@ -86,33 +86,30 @@ public class Course {
     public List<Student> studentList() {
         String findStudentListSql = "SELECT * FROM student_course WHERE course_id = (?)";
 
+        Object[] args = {
+                id()
+        };
+
         List<Student> resultList = new LinkedList<>();
-        find(id(), findStudentListSql);
 
-        return resultList;
-    }
-
-    private static Optional<Student> find(int value, String sql) {
-        Object[] args = {value};
-        try (ResultSet rs = QueryExecutor.read(sql, args)) {
-            if (rs.next()) {
-                return Optional.of(new Student(
-                        rs.getInt("id"),
-                        rs.getString("first_name"),
-                        rs.getString("last_name"),
-                        rs.getInt("index_number")
-                ));
-            } else {
-                return Optional.empty();
+        try (ResultSet rs = QueryExecutor.read(findStudentListSql, args)) {
+            while (rs.next()) {
+                Optional<Student> student = Student.findById(rs.getInt("student_id"));
+                student.ifPresent(resultList::add);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return Optional.empty();
+
+        return resultList;
     }
 
     public List<Student> cachedStudentsList() {
-        //TOTO implement
+        if (isStudentsListDownloaded) {
+            return enrolledStudents;
+        }
+        enrolledStudents = studentList();
+        isStudentsListDownloaded = true;
         return enrolledStudents;
     }
 

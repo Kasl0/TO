@@ -74,8 +74,30 @@ public class Student {
     }
 
     public Map<Course, Float> createReport() {
-        // TODO additional task
-        return Collections.emptyMap();
+
+        String sql = "SELECT course_id, AVG(grade) AS avg_grade " +
+                "FROM grade " +
+                "WHERE student_id = (?) " +
+                "GROUP BY course_id;";
+
+        Object[] args = {
+                id()
+        };
+
+        Map<Course, Float> report = new java.util.HashMap<>(Collections.emptyMap());
+
+        try (ResultSet rs = QueryExecutor.read(sql, args)) {
+            while (rs.next()) {
+                Optional<Course> course = Course.findById(rs.getInt("course_id"));
+                if (course.isPresent()) {
+                    report.put(course.get(),rs.getFloat("avg_grade"));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return report;
     }
 
     public int id() {
