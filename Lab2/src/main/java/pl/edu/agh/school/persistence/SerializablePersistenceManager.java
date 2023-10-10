@@ -21,6 +21,14 @@ public final class SerializablePersistenceManager {
         classStorageFileName = "classes.dat";
     }
 
+    public void setTeachersStorageFileName(String teachersStorageFileName) {
+        this.teachersStorageFileName = teachersStorageFileName;
+    }
+
+    public void setClassStorageFileName(String classStorageFileName) {
+        this.classStorageFileName = classStorageFileName;
+    }
+
     public void saveTeachers(List<Teacher> teachers) {
         if (teachers == null) {
             throw new IllegalArgumentException();

@@ -18,6 +18,8 @@ public class SchoolDAO {
 
     public SchoolDAO() {
         manager = new SerializablePersistenceManager();
+        manager.setTeachersStorageFileName("teachers.dat");
+        manager.setClassStorageFileName("classes.dat");
         teachers = manager.loadTeachers();
         classes = manager.loadClasses();
     }
