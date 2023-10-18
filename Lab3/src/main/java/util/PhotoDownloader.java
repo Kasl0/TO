@@ -2,6 +2,7 @@ package util;
 
 import driver.DuckDuckGoDriver;
 import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import model.Photo;
 import org.apache.tika.Tika;
 
@@ -22,25 +23,38 @@ public class PhotoDownloader {
     private static final Logger log = Logger.getLogger(PhotoDownloader.class.getName());
 
     public Observable<Photo> getPhotoExamples() throws IOException {
-        return Observable.just(getPhoto("https://i.ytimg.com/vi/7uxQjydfBOU/hqdefault.jpg"),
-                        getPhoto("http://digitalspyuk.cdnds.net/16/51/1280x640/landscape-1482419524-12382542-low-res-sherlock.jpg"),
-                        getPhoto("http://image.pbs.org/video-assets/pbs/masterpiece/132733/images/mezzanine_172.jpg"),
-                        getPhoto("https://classicmystery.files.wordpress.com/2016/04/miss-marple-2.jpg"),
-                        getPhoto("https://i.pinimg.com/736x/7c/14/c9/7c14c97839940a09f987fbadbd47eb89--detective-monk-adrian-monk.jpg"));
+        return Observable.just("https://i.ytimg.com/vi/7uxQjydfBOU/hqdefault.jpg",
+                        "http://digitalspyuk.cdnds.net/16/51/1280x640/landscape-1482419524-12382542-low-res-sherlock.jpg",
+                        "http://image.pbs.org/video-assets/pbs/masterpiece/132733/images/mezzanine_172.jpg",
+                        "https://classicmystery.files.wordpress.com/2016/04/miss-marple-2.jpg",
+                        "https://i.pinimg.com/736x/7c/14/c9/7c14c97839940a09f987fbadbd47eb89--detective-monk-adrian-monk.jpg")
+                .map(this::getPhoto);
     }
 
-    public List<Photo> searchForPhotos(String searchQuery) throws IOException, InterruptedException {
-        List<Photo> photos = new ArrayList<>();
-        List<String> photoUrls = DuckDuckGoDriver.searchForImages(searchQuery);
+    public Observable<Photo> searchForPhotos(String searchQuery) {
 
-        for (String photoUrl : photoUrls) {
+        return Observable.create(observer -> {
+            List<String> photoUrls = new ArrayList<>();
             try {
-                photos.add(getPhoto(photoUrl));
+                photoUrls = DuckDuckGoDriver.searchForImages(searchQuery);
             } catch (IOException e) {
-                log.log(Level.WARNING, "Could not download a photo", e);
+                observer.onError(e);
             }
-        }
-        return photos;
+            try {
+                for (String photoUrl : photoUrls) {
+                    observer.onNext(getPhoto(photoUrl));
+                }
+                observer.onComplete();
+            } catch (IOException e) {
+                log.log(Level.SEVERE, "Downloading photo error");
+            }
+
+        });
+    }
+
+    public Observable<Photo> searchForPhotos(List<String> searchQueries) {
+        return Observable.fromIterable(searchQueries).subscribeOn(Schedulers.newThread())
+                .flatMap(this::searchForPhotos);
     }
 
     private Photo getPhoto(String photoUrl) throws IOException {
