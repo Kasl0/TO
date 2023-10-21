@@ -4,12 +4,15 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import pl.edu.agh.logger.Logger;
 import pl.edu.agh.school.SchoolClass;
 import pl.edu.agh.school.Teacher;
 
-public final class SerializablePersistenceManager {
+public final class SerializablePersistenceManager implements IPersistenceManager {
 
+    @Inject
     private static final Logger log = Logger.getInstance();
 
     private String teachersStorageFileName;
@@ -21,14 +24,17 @@ public final class SerializablePersistenceManager {
         classStorageFileName = "classes.dat";
     }
 
-    public void setTeachersStorageFileName(String teachersStorageFileName) {
+    @Inject
+    public void setTeachersStorageFileName(@Named("classesStorage") String teachersStorageFileName) {
         this.teachersStorageFileName = teachersStorageFileName;
     }
 
-    public void setClassStorageFileName(String classStorageFileName) {
+    @Inject
+    public void setClassStorageFileName(@Named("teachersStorage") String classStorageFileName) {
         this.classStorageFileName = classStorageFileName;
     }
 
+    @Override
     public void saveTeachers(List<Teacher> teachers) {
         if (teachers == null) {
             throw new IllegalArgumentException();
@@ -42,6 +48,7 @@ public final class SerializablePersistenceManager {
         }
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public List<Teacher> loadTeachers() {
         ArrayList<Teacher> res = null;
@@ -58,6 +65,7 @@ public final class SerializablePersistenceManager {
         return res;
     }
 
+    @Override
     public void saveClasses(List<SchoolClass> classes) {
         if (classes == null) {
             throw new IllegalArgumentException();
@@ -72,6 +80,7 @@ public final class SerializablePersistenceManager {
         }
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public List<SchoolClass> loadClasses() {
         ArrayList<SchoolClass> res = null;

@@ -1,10 +1,13 @@
 package pl.edu.agh.school.demo;
 
+import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import pl.edu.agh.logger.ConsoleMessageSerializer;
 import pl.edu.agh.logger.FileMessageSerializer;
 import pl.edu.agh.logger.Logger;
@@ -16,6 +19,7 @@ import pl.edu.agh.school.Student;
 import pl.edu.agh.school.Subject;
 import pl.edu.agh.school.Teacher;
 import pl.edu.agh.school.Term;
+import pl.edu.agh.school.guice.SchoolModule;
 
 public class SchoolDemo {
 
@@ -24,7 +28,8 @@ public class SchoolDemo {
     private final DateFormat timeFormat = new SimpleDateFormat("hh:mm");
 
     public SchoolDemo() {
-        school = new School();
+        final Injector injector = Guice.createInjector(new SchoolModule());
+        school = injector.getInstance(School.class);
     }
 
     public static void main(String[] args) throws Exception {

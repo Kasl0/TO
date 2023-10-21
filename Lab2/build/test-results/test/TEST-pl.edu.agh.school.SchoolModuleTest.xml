@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="pl.edu.agh.school.SchoolModuleTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2023-10-21T21:56:41" hostname="KASLO" time="0.128">
+  <properties/>
+  <testcase name="loggerIsSingleton()" classname="pl.edu.agh.school.SchoolModuleTest" time="0.128"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

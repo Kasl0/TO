@@ -1,10 +1,13 @@
 package pl.edu.agh.school;
 
+import com.google.inject.Inject;
+
 import java.util.ArrayList;
 import java.util.Collection;
 
 public class School {
 
+    @Inject
     private SchoolDAO schoolDAO;
 
     public School() {
