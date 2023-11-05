@@ -7,6 +7,10 @@ import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 
+import io.reactivex.rxjava3.schedulers.Schedulers;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 
 import model.Gallery;
@@ -25,7 +29,15 @@ public class PhotoSerializer {
     }
 
     public void registerGallery(Gallery gallery) {
-        // TODO model <-> serializer bindings configuration
+        gallery.getPhotos().addListener((ListChangeListener<? super Photo>) change -> {
+            while (change.next()) {
+                if (change.wasAdded()) {
+                    change.getAddedSubList().forEach(this::savePhoto);
+                } else if (change.wasRemoved()) {
+                    change.getRemoved().forEach(this::removePhoto);
+                }
+            }
+        });
     }
 
     private void createLibraryDirectory() throws IOException {
@@ -40,11 +52,16 @@ public class PhotoSerializer {
 
     public void savePhoto(Photo photo) {
         log.info("SAVE photo: " + photo.getName());
-        try {
-            ImageIO.write(SwingFXUtils.fromFXImage(photo.getPhotoData(), null), "png", new File(getPhotoPath(photo)));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Schedulers.io().scheduleDirect(() -> {
+            try {
+                ImageIO.write(SwingFXUtils.fromFXImage(photo.getPhotoData(), null), "png", new File(getPhotoPath(photo)));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            photo.nameProperty().addListener((observable, oldValue, newValue) -> {
+                renamePhoto(oldValue, newValue);
+            });
+        });
     }
 
     public void renamePhoto(String oldPhotoName, String newPhotoName) {
